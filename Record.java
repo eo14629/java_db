@@ -13,7 +13,6 @@ class Record {
     program.testRecord();
   }
 
-  // do i need to input an id for this or will that come in the table class?
   Record(String... field_entries) {
     for (String field_entry: field_entries) {
       the_record.add(field_entry);
@@ -21,21 +20,44 @@ class Record {
     }
   }
 
-  String getItem(int field_num) {
-    return the_record.get(field_num);
+  String getItem(int index) {
+    return the_record.get(index);
   }
 
-  // Should these be booleans and return true or false such that better for testing?
-  void ammendItem(int field_num, String value) {
-    the_record.set(field_num, value);// is it best to use the set error or create your own?
+  // have not tested this yet
+  boolean contains(String field) {
+    if (the_record.contains(field)) { return true; }
+    return false;
   }
 
-  void printRecord(ArrayList<String> record) {
-    System.out.println(record);
+  int indexOf(String field) {
+    return the_record.indexOf(field);
   }
 
-  ArrayList<String> theRecord() {
-    return the_record;
+  void addItem(String value) {
+    the_record.add(value);
+    size++;
+  }
+
+  boolean removeItem(int index) {
+    if (index < the_record.size()) {
+      the_record.remove(index);
+      size--;
+      return true;
+    }
+    return false;
+  }
+
+  boolean ammendItem(int index, String value) {
+    if (index < the_record.size()) {
+      the_record.set(index, value);
+      return true;
+    }
+    return false;
+  }
+
+  void printRecord() {
+    System.out.println(the_record);
   }
 
   int size() {
@@ -51,19 +73,35 @@ class Record {
   }
 
   void testRecord() {
+    // creating records by using constructors
     Record a_record = new Record("One","Two","Three");
     Record b_record = new Record("a","b");
     Record c_record = new Record("five","m","i","l","l","i","o","n");
 
+    // get
     claim(a_record.getItem(1).equals("Two"));
     claim(c_record.getItem(7).equals("n"));
 
-    c_record.ammendItem(0,"six");
+    // ammend
+    claim(c_record.ammendItem(0,"six"));
     claim(c_record.getItem(0).equals("six"));
-    b_record.ammendItem(1,"c");
+    claim(b_record.ammendItem(1,"c"));
     claim(b_record.getItem(1).equals("c"));
+    claim(! b_record.ammendItem(2,"d"));
 
-    printRecord(a_record.the_record);
-    printRecord(b_record.the_record);
+    // add and remove
+    a_record.addItem("Four");
+    claim(a_record.size() == 4 && a_record.getItem(3).equals("Four"));
+    claim(b_record.removeItem(0));
+    claim(! b_record.removeItem(1));
+    claim(b_record.size() == 1);
+
+    // contains and indexOf
+    claim(c_record.contains("six"));
+    claim(c_record.indexOf("l")==3);// will find the first instance
+
+    a_record.printRecord();
+    b_record.printRecord();
+    c_record.printRecord();
   }
 }
