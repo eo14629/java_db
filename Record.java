@@ -30,14 +30,19 @@ class Record {
     return getRecord(id_key).get(field_num);
   }
 
+  // Should these be booleans and return true or false such that better for testing?
   void ammendRecord(int id_key, int field_num, String value) {
     // if (field_num < getRecord(id_key).size()) {
       getRecord(id_key).set(field_num, value);// is it best to use the set error or create your own?
     // } else { throw new Error("field_num value larger than num of fields"); }
   }
 
-  void printHashtable() {
-    System.out.println(records);
+  void deleteRecord(int id_key) {
+    if (records.remove(id_key) == null) { throw new Error("Key does not exist"); }
+  }
+
+  void printHashtable(Hashtable<Integer,ArrayList<String>> table) {
+    System.out.println(table);
   }
 
   /******************************************/
@@ -52,7 +57,6 @@ class Record {
     addRecord("One","Two","Three");
     addRecord("a","b");
     addRecord("five","m","i","l","l","i","o","n");
-    printHashtable();
 
     claim(getItem(1,1).equals("b"));
     claim(getItem(2,7).equals("n"));
@@ -62,5 +66,12 @@ class Record {
 
     ammendRecord(2,0,"six");
     claim(getItem(2,0).equals("six"));
+    ammendRecord(0,2,"Four");
+    claim(getItem(0,2).equals("Four"));
+
+    deleteRecord(2);
+    printHashtable(records);
+    deleteRecord(0);
+    printHashtable(records);
   }
 }
