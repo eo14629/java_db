@@ -5,44 +5,41 @@
 import java.util.*;
 
 class Record {
-  private Hashtable<Integer,ArrayList<String>> records = new Hashtable<Integer,ArrayList<String>>();
-  private int key = 0;
+  private ArrayList<String> the_record = new ArrayList<String>();
+  private int size;
 
   public static void main(String args[]) {
     Record program = new Record();
     program.testRecord();
   }
 
-  void addRecord(String... field_entries) {
-    ArrayList<String> new_record = new ArrayList<String>();
+  // do i need to input an id for this or will that come in the table class?
+  Record(String... field_entries) {
     for (String field_entry: field_entries) {
-      new_record.add(field_entry);
+      the_record.add(field_entry);
+      size++;
     }
-    records.put(key, new_record);
-    key++;
   }
 
-  ArrayList<String> getRecord(int id_key) {
-    return records.get(id_key);
-  }
-
-  String getItem(int id_key, int field_num) {
-    return getRecord(id_key).get(field_num);
+  String getItem(int field_num) {
+    return the_record.get(field_num);
   }
 
   // Should these be booleans and return true or false such that better for testing?
-  void ammendRecord(int id_key, int field_num, String value) {
-    // if (field_num < getRecord(id_key).size()) {
-      getRecord(id_key).set(field_num, value);// is it best to use the set error or create your own?
-    // } else { throw new Error("field_num value larger than num of fields"); }
+  void ammendItem(int field_num, String value) {
+    the_record.set(field_num, value);// is it best to use the set error or create your own?
   }
 
-  void deleteRecord(int id_key) {
-    if (records.remove(id_key) == null) { throw new Error("Key does not exist"); }
+  void printRecord(ArrayList<String> record) {
+    System.out.println(record);
   }
 
-  void printHashtable(Hashtable<Integer,ArrayList<String>> table) {
-    System.out.println(table);
+  ArrayList<String> theRecord() {
+    return the_record;
+  }
+
+  int size() {
+    return size;
   }
 
   /******************************************/
@@ -54,24 +51,19 @@ class Record {
   }
 
   void testRecord() {
-    addRecord("One","Two","Three");
-    addRecord("a","b");
-    addRecord("five","m","i","l","l","i","o","n");
+    Record a_record = new Record("One","Two","Three");
+    Record b_record = new Record("a","b");
+    Record c_record = new Record("five","m","i","l","l","i","o","n");
 
-    claim(getItem(1,1).equals("b"));
-    claim(getItem(2,7).equals("n"));
+    claim(a_record.getItem(1).equals("Two"));
+    claim(c_record.getItem(7).equals("n"));
 
-    claim(getRecord(1).get(0).equals("a"));
-    claim(getRecord(2).get(0).equals("five"));
+    c_record.ammendItem(0,"six");
+    claim(c_record.getItem(0).equals("six"));
+    b_record.ammendItem(1,"c");
+    claim(b_record.getItem(1).equals("c"));
 
-    ammendRecord(2,0,"six");
-    claim(getItem(2,0).equals("six"));
-    ammendRecord(0,2,"Four");
-    claim(getItem(0,2).equals("Four"));
-
-    deleteRecord(2);
-    printHashtable(records);
-    deleteRecord(0);
-    printHashtable(records);
+    printRecord(a_record.the_record);
+    printRecord(b_record.the_record);
   }
 }
