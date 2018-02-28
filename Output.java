@@ -24,19 +24,13 @@ class Output {
   void writeCsv(Table table, String file_name) {
     File f = new File(file_name);
     FileWriter out = null;
+    
     try {
       out = new FileWriter(f);
 
-      for (int item=0; item<table.selectFieldNames().size(); item++) {
-        out.write(table.selectFieldNames().getItem(item) + ",");
-      }
-      out.write("\n");
-
+      writeFields(table.selectFieldNames(), out);
       for (Integer key : table.getKeys()) {
-        for (int item=0; item<table.selectRecord(key).size(); item++) {
-          out.write(table.selectRecord(key).getItem(item) + ",");
-        }
-        out.write("\n");
+        writeFields(table.selectRecord(key), out);
       }
     } catch (IOException e) {
       e.printStackTrace();
@@ -44,6 +38,21 @@ class Output {
       if (out != null) try { out.close(); } catch (IOException ignore) {}
     }
   }
+
+  void writeFields(Record record, FileWriter out) {
+    try {
+      for (int item=0; item<record.size(); item++) {
+        out.write(record.getItem(item) + ",");
+      }
+      out.write("\n");
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  /******************************************/
+  /***************** TESTING ****************/
+  /******************************************/
 
   void testToFile() {
     Table football = new Table("Team","Goals","Points");

@@ -34,7 +34,6 @@ class Table {
     return table.get(id_key);
   }
 
-  // is this bad form?????
   Record selectFieldNames() {
     return field_names;
   }
@@ -48,7 +47,7 @@ class Table {
       return false;
     }
   }
-  
+
   void addColoumn(String heading) {
     field_names.addItem(heading);
     for (Integer key: keys) {
