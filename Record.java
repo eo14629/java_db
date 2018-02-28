@@ -20,20 +20,6 @@ class Record {
     }
   }
 
-  String getItem(int index) {
-    return the_record.get(index);
-  }
-
-  // have not tested this yet
-  boolean contains(String field) {
-    if (the_record.contains(field)) { return true; }
-    return false;
-  }
-
-  int indexOf(String field) {
-    return the_record.indexOf(field);
-  }
-
   void addItem(String value) {
     the_record.add(value);
     size++;
@@ -56,8 +42,17 @@ class Record {
     return false;
   }
 
-  void printRecord() {
-    System.out.println(the_record);
+  boolean contains(String field) {
+    if (the_record.contains(field)) { return true; }
+    return false;
+  }
+
+  int indexOf(String field) {
+    return the_record.indexOf(field);
+  }
+
+  String getItem(int index) {
+    return the_record.get(index);
   }
 
   int size() {
@@ -67,6 +62,10 @@ class Record {
   /******************************************/
   /***************** TESTING ****************/
   /******************************************/
+
+  void printRecord() {
+    System.out.println(the_record);
+  }
 
   void claim(boolean b) {
     if (!b) throw new Error("Test failed");

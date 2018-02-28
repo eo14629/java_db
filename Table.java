@@ -34,6 +34,21 @@ class Table {
     return table.get(id_key);
   }
 
+  // is this bad form?????
+  Record selectFieldNames() {
+    return field_names;
+  }
+
+  boolean updateRecord(Record r, String field_name, String value) {
+    if (field_names.contains(field_name)) {
+      int i = field_names.indexOf(field_name);
+      r.ammendItem(i,value);
+      return true;
+    } else {
+      return false;
+    }
+  }
+  
   void addColoumn(String heading) {
     field_names.addItem(heading);
     for (Integer key: keys) {
@@ -54,15 +69,13 @@ class Table {
     }
   }
 
-  boolean updateRecord(Record r, String field_name, String value) {
-    if (field_names.contains(field_name)) {
-      int i = field_names.indexOf(field_name);
-      r.ammendItem(i,value);
-      return true;
-    } else {
-      return false;
-    }
+  Set<Integer> getKeys() {
+    return keys;
   }
+
+  /******************************************/
+  /***************** TESTING ****************/
+  /******************************************/
 
   void printFieldNames() {
     field_names.printRecord();
@@ -76,18 +89,6 @@ class Table {
       selectRecord(key).printRecord();
     }
   }
-
-  // void makeTable(String table_name, String... field_names) {
-  //   ArrayList<String> field_names = new ArrayList<String>();
-  //   for (String field_name: field_names) {
-  //     field_names.add(field_name);
-  //   }
-  //   table_field_names.put(table_name, field_names);
-  // }
-
-  /******************************************/
-  /***************** TESTING ****************/
-  /******************************************/
 
   void claim(boolean b) {
     if (!b) throw new Error("Test failed");
