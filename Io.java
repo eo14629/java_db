@@ -10,12 +10,12 @@ class Output {
 
   void print(Table table) {
     for (int item=0; item<table.selectFieldNames().size(); item++) {
-      System.out.print(table.selectFieldNames().getItem(item) + "\t");
+      System.out.print(table.selectFieldNames().getItem(item) + "\t" + "|");
     }
     System.out.println();
     for (Integer key : table.getKeys()) {
       for (int item=0; item<table.selectRecord(key).size(); item++) {
-        System.out.print(table.selectRecord(key).getItem(item) + "\t");
+        System.out.print(table.selectRecord(key).getItem(item) + "\t" + "|");
       }
       System.out.println();
     }
@@ -24,7 +24,7 @@ class Output {
   void writeCsv(Table table, String file_name) {
     File f = new File(file_name);
     FileWriter out = null;
-    
+
     try {
       out = new FileWriter(f);
 
@@ -42,7 +42,7 @@ class Output {
   void writeFields(Record record, FileWriter out) {
     try {
       for (int item=0; item<record.size(); item++) {
-        out.write(record.getItem(item) + ",");
+        out.write("\"" + record.getItem(item) + "\"" + ",");
       }
       out.write("\n");
     } catch (IOException e) {
@@ -57,12 +57,17 @@ class Output {
   void testToFile() {
     Table football = new Table("Team","Goals","Points");
 
-    Record r1 = new Record("Bristol", "2", "3");
+    Record r1 = new Record("Bristol Rovers", "2", "3");
     Record r2 = new Record("Arsenal", "9", "42");
     Record r3 = new Record("QPR", "19", "38");
+    Record r4 = new Record("hoop's", "17", "1");
+    Record r5 = new Record("to be, or not to be", "904", "17");
+
     football.insertRecord(r1);
     football.insertRecord(r2);
     football.insertRecord(r3);
+    football.insertRecord(r4);
+    football.insertRecord(r5);
 
     print(football);
     writeCsv(football, "test.csv");
