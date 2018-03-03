@@ -1,10 +1,10 @@
 import java.util.*;
 import java.io.*;
 
-class Output {
+class Io {
 
   public static void main(String args[]) {
-    Output program = new Output();
+    Io program = new Io();
     program.testToFile();
   }
 
@@ -42,12 +42,53 @@ class Output {
   void writeFields(Record record, FileWriter out) {
     try {
       for (int item=0; item<record.size(); item++) {
-        out.write("\"" + record.getItem(item) + "\"" + ",");
+        out.write("\"" + record.getItem(item) + "\"");
+        if (item != record.size() - 1) {
+          out.write(",");
+        }
       }
       out.write("\n");
     } catch (IOException e) {
       e.printStackTrace();
     }
+  }
+
+  // assumed here that the format of the csv is double quoted fields
+  // separated by commas.
+  Table inputCsv(String pathname) {
+    File file = new File(pathname);
+    Scanner scanner = null;
+    Table table = new Table();
+    boolean first_line = true;
+
+    try {
+      scanner = new Scanner(file);
+
+      while(scanner.hasNextLine()) {
+        Record record = new Record();
+        StringBuilder sb = new StringBuilder();
+
+        sb.append(scanner.nextLine());
+        // if (sb.toString().charAt(0) == '\"' && sb.toString().charAt(sb.length() - 1) == '\"') {
+        sb.deleteCharAt(0);
+        sb.deleteCharAt(sb.length() - 1);
+        // }
+        for (String item : sb.toString().split("\",\"")) {
+          if (first_line) {
+            table.addColumn(item);
+          } else {
+            record.addItem(item);
+          }
+        }
+        table.insertRecord(record);
+        first_line = false;
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    } finally {
+      scanner.close();
+    }
+    return table;
   }
 
   /******************************************/
@@ -56,6 +97,7 @@ class Output {
 
   void testToFile() {
     Table football = new Table("Team","Goals","Points");
+    Table football2 = new Table();
 
     Record r1 = new Record("Bristol Rovers", "2", "3");
     Record r2 = new Record("Arsenal", "9", "42");
@@ -69,8 +111,15 @@ class Output {
     football.insertRecord(r4);
     football.insertRecord(r5);
 
-    print(football);
-    writeCsv(football, "test.csv");
+    // instanciate in a loop
+    for (int i=0; i<5; i++) {
+      Record r6 = new Record(Integer.toString(i), "904", "17");
+      football.insertRecord(r6);
+    }
+
+    football2 = inputCsv("test.csv");
+    print(football2);
+    // writeCsv(football, "test.csv");
   }
 
 }

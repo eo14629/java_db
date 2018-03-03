@@ -48,7 +48,7 @@ class Table {
     }
   }
 
-  void addColoumn(String heading) {
+  void addColumn(String heading) {
     field_names.addItem(heading);
     for (Integer key: keys) {
       selectRecord(key).addItem(null);
@@ -120,7 +120,7 @@ class Table {
 
     // adding and removing columns and updating the values
     a_table.printTable();
-    a_table.addColoumn("Points");
+    a_table.addColumn("Points");
     claim(a_table.field_names.size() == 3);
     claim(a_table.updateRecord(r3, "Points", "31"));
     claim(! a_table.updateRecord(r4, "Poits", "31"));
