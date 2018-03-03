@@ -111,15 +111,15 @@ class Io {
     football.insertRecord(r4);
     football.insertRecord(r5);
 
-    // instanciate in a loop
+    // instantiate in a loop
     for (int i=0; i<5; i++) {
       Record r6 = new Record(Integer.toString(i), "904", "17");
       football.insertRecord(r6);
     }
 
+    writeCsv(football, "test.csv");
     football2 = inputCsv("test.csv");
     print(football2);
-    // writeCsv(football, "test.csv");
   }
 
 }

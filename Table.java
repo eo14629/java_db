@@ -4,25 +4,51 @@ class Table {
   private Hashtable<Integer,Record> table = new Hashtable<Integer,Record>();
   private Record field_names = new Record();
   private Set<Integer> keys = table.keySet();
+  private ArrayList<Integer> pk_cols = new ArrayList<Integer>();
+  private Set<ArrayList<String>> primary_keys = new HashSet<ArrayList<String>>();
   private int id = 0;
 
   public static void main(String args[]) {
-    Table program = new Table();
+    Table program = new Table("*");// the * is needed for testing purposes only
     program.testTable();
   }
 
   Table(String... field_names) {
+    int col_count = 0;
     Record field_name_record = new Record(field_names);
+    for (int i=0; i<field_name_record.size(); i++) {
+      StringBuilder sb = new StringBuilder(field_name_record.getItem(i));
+      while(sb.toString().charAt(sb.length()-1) == ' ') {
+        sb.deleteCharAt(sb.length()-1);
+      }
+      if (sb.toString().charAt(sb.toString().length()-1) == '*') {
+        pk_cols.add(col_count);
+      }
+      field_name_record.ammendItem(i,sb.toString());
+      col_count++;
+    }
+    if (pk_cols.size()==0) {
+      throw new Error("No primary keys. Put a '*' at the end of a column name to represent a pk");
+    }
     this.field_names = field_name_record;
   }
 
+  // probs need errors here.
   boolean insertRecord(Record r) {
-    if (r.size() == field_names.size()) {
+    if (r.size() == field_names.size() && checkPk(r)) {
       table.put(id,r);
       id++;
       return true;
     }
     return false;
+  }
+
+  boolean checkPk(Record r) {
+    ArrayList<String> key = new ArrayList<String>();
+    for (int col : pk_cols) {
+      key.add(r.getItem(col));
+    }
+    return primary_keys.add(key);
   }
 
   boolean deleteRecord(int id_key) {
@@ -34,10 +60,6 @@ class Table {
     return table.get(id_key);
   }
 
-  Record selectFieldNames() {
-    return field_names;
-  }
-
   boolean updateRecord(Record r, String field_name, String value) {
     if (field_names.contains(field_name)) {
       int i = field_names.indexOf(field_name);
@@ -46,6 +68,18 @@ class Table {
     } else {
       return false;
     }
+  }
+
+  Set<Integer> getKeys() {
+    return keys;
+  }
+
+  Record selectFieldNames() {
+    return field_names;
+  }
+
+  int size() {
+    return table.size();
   }
 
   void addColumn(String heading) {
@@ -66,10 +100,6 @@ class Table {
     } else {
       return false;
     }
-  }
-
-  Set<Integer> getKeys() {
-    return keys;
   }
 
   /******************************************/
@@ -94,7 +124,8 @@ class Table {
   }
 
   void testTable() {
-    Table a_table = new Table("Name", "League");
+    System.out.println("Testing start");
+    Table a_table = new Table("Name*", "League");
 
     // Insertions
     Record r1 = new Record("Bristol FC", "Championship");
@@ -109,6 +140,8 @@ class Table {
     Record r5 = new Record("WBA", "Championship");
     claim(a_table.insertRecord(r5));
     claim(a_table.selectRecord(3).getItem(0).equals("WBA"));
+    Record r6 = new Record("WBA", "Prem");
+    claim(! a_table.insertRecord(r6));
 
     // deletions
     claim(a_table.deleteRecord(3));
@@ -127,6 +160,36 @@ class Table {
     a_table.printTable();
     claim(a_table.removeColoumn("League"));
     claim(! a_table.removeColoumn("Legue"));
+
+    // check that the primary key column array list stores the correct columns
+    // respresenting the primary keys.
+    // Also make sure that the constructor gets rid of extra spaces
+    Table table_pk = new Table("Name*      ","League* ","Points   ");
+    claim(table_pk.pk_cols.size()==2);
+    claim(table_pk.pk_cols.get(0)==0);
+    claim(table_pk.pk_cols.get(1)==1);
+    claim(table_pk.field_names.size()==3);
+    claim(! table_pk.field_names.getItem(0).equals("Name*  "));
+    claim(table_pk.field_names.getItem(0).equals("Name*"));
+    claim(table_pk.field_names.getItem(1).equals("League*"));
+    claim(table_pk.field_names.getItem(2).equals("Points"));
+
+    // check the error is thrown for no primary keys
+    // Table table_pk2 = new Table("Name","League","Points");
+
+    // ensure the primary keys work as they should and not allow a record
+    // to be inserted if it disobeys the pk rules
+    Record r01 = new Record("Bristol FC", "Championship", "14");
+    Record r02 = new Record("Bristol FC", "Premier League", "14");
+    Record r03 = new Record("QPR", "Championship", "1");
+    Record r04 = new Record("Bristol FC", "Championship", "12");
+    claim(table_pk.insertRecord(r01));
+    claim(table_pk.insertRecord(r02));
+    claim(table_pk.insertRecord(r03));
+    claim(! table_pk.insertRecord(r04));
+    claim(table_pk.primary_keys.size()==3);
+    claim(table_pk.size()==3);
+
     a_table.printTable();
   }
 }

@@ -34,6 +34,10 @@ class Record {
     return false;
   }
 
+  String getItem(int index) {
+    return the_record.get(index);
+  }
+
   boolean ammendItem(int index, String value) {
     if (index < the_record.size()) {
       the_record.set(index, value);
@@ -42,6 +46,8 @@ class Record {
     return false;
   }
 
+  // diff from table
+
   boolean contains(String field) {
     if (the_record.contains(field)) { return true; }
     return false;
@@ -49,10 +55,6 @@ class Record {
 
   int indexOf(String field) {
     return the_record.indexOf(field);
-  }
-
-  String getItem(int index) {
-    return the_record.get(index);
   }
 
   int size() {
