@@ -41,9 +41,9 @@ class Io {
 
   void writeFields(Record record, FileWriter out) {
     try {
-      for (int item=0; item<record.size(); item++) {
-        out.write("\"" + record.getItem(item) + "\"");
-        if (item != record.size() - 1) {
+      for (int n=0; n<record.size(); n++) {
+        out.write("\"" + record.getItem(n) + "\"");
+        if (n != record.size() - 1) {
           out.write(",");
         }
       }
@@ -58,6 +58,7 @@ class Io {
   Table inputCsv(String pathname) {
     File file = new File(pathname);
     Scanner scanner = null;
+    Record headings = new Record();
     Table table = new Table();
     boolean first_line = true;
 
@@ -80,6 +81,9 @@ class Io {
             record.addItem(item);
           }
         }
+        if (first_line && table.numPks()==0) {
+          throw new Error("No primary keys. Put a '*' at the end of a column name when instantiating a table to represent a pk");
+        }
         table.insertRecord(record);
         first_line = false;
       }
@@ -95,9 +99,15 @@ class Io {
   /***************** TESTING ****************/
   /******************************************/
 
+  void claim(boolean b) {
+    if (!b) throw new Error("Test failed");
+  }
+
   void testToFile() {
-    Table football = new Table("Team","Goals","Points");
-    Table football2 = new Table();
+    System.out.println("Testing start");
+
+    Table football_out = new Table("Team*","Goals  ","Points");
+    Table football_in = new Table();
 
     Record r1 = new Record("Bristol Rovers", "2", "3");
     Record r2 = new Record("Arsenal", "9", "42");
@@ -105,21 +115,35 @@ class Io {
     Record r4 = new Record("hoop's", "17", "1");
     Record r5 = new Record("to be, or not to be", "904", "17");
 
-    football.insertRecord(r1);
-    football.insertRecord(r2);
-    football.insertRecord(r3);
-    football.insertRecord(r4);
-    football.insertRecord(r5);
+    claim(football_out.insertRecord(r1));
+    claim(football_out.insertRecord(r2));
+    claim(football_out.insertRecord(r3));
+    claim(football_out.insertRecord(r4));
+    claim(football_out.insertRecord(r5));
 
     // instantiate in a loop
     for (int i=0; i<5; i++) {
       Record r6 = new Record(Integer.toString(i), "904", "17");
-      football.insertRecord(r6);
+      football_out.insertRecord(r6);
     }
+    claim(football_out.size()==10);
 
-    writeCsv(football, "test.csv");
-    football2 = inputCsv("test.csv");
-    print(football2);
+    // write the table to a file, then output the file into a table
+    // and ensure the table is correctly layed out.
+    // -- Note, the table key order is flipped because of the way records are insertRecord
+    // -- and then read.
+    writeCsv(football_out, "test.csv");
+    football_in = inputCsv("test.csv");
+
+    claim(football_in.size()==10);
+    claim(football_in.selectFieldNames().getItem(0).equals("Team*"));
+    claim(football_in.selectFieldNames().getItem(1).equals("Goals"));
+    claim(football_in.selectFieldNames().getItem(2).equals("Points"));
+    claim(football_in.selectRecord(0).getItem(0).equals("4"));
+    claim(football_in.selectRecord(3).getItem(1).equals("904"));
+    claim(football_in.selectRecord(9).getItem(0).equals("Bristol Rovers"));
+
+    System.out.println("Testing finished");
   }
 
 }

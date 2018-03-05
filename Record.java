@@ -20,9 +20,9 @@ class Record {
     }
   }
 
-  void addItem(String value) {
-    the_record.add(value);
+  boolean addItem(String value) {
     size++;
+    return the_record.add(value);
   }
 
   boolean removeItem(int index) {
