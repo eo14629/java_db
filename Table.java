@@ -1,11 +1,12 @@
 import java.util.*;
 
 class Table {
-  private Hashtable<Integer,Record> table = new Hashtable<Integer,Record>();
+  // think there is repeted data here. because the keys are storing data
+  // that is also in the hash key
+  private Hashtable<ArrayList<String>,Record> table = new Hashtable<ArrayList<String>,Record>();
   private Record headings = new Record();
-  private Set<Integer> keys = table.keySet();
+  private Set<ArrayList<String>> hash_keys = table.keySet();
   private ArrayList<Integer> pk_cols = new ArrayList<Integer>();
-  private Set<ArrayList<String>> primary_keys = new HashSet<ArrayList<String>>();
   private int id = 0;
 
   public static void main(String args[]) {
@@ -35,20 +36,18 @@ class Table {
 
   // probs need errors here.
   boolean insertRecord(Record r) {
-    if (r.size() == headings.size() && checkPk(r)) {
-      table.put(id,r);
-      id++;
-      return true;
+    if (r.size() == headings.size()) {
+      ArrayList<String> key = new ArrayList<String>();
+      for (int col : pk_cols) {
+        key.add(r.getItem(col));
+      }
+      if (table.put(key,r)==null) {
+        return true;
+      } else {
+        return false;
+      }
     }
     return false;
-  }
-
-  boolean checkPk(Record r) {
-    ArrayList<String> key = new ArrayList<String>();
-    for (int col : pk_cols) {
-      key.add(r.getItem(col));
-    }
-    return primary_keys.add(key);
   }
 
   int numPks() {
@@ -62,16 +61,21 @@ class Table {
     return false;
   }
 
-  boolean deleteRecord(int id_key) {
-    if (table.remove(id_key) == null) { return false; }
+  boolean deleteRecord(String... id_keys) {
+    ArrayList<String> pk = new ArrayList<String>();
+    for (String id_key : id_keys) {
+      pk.add(id_key);
+    }
+    if (table.remove(pk) == null) { return false; }
     return true;
   }
 
-  ////////////////////////
-  /// use primary keys ///
-  ////////////////////////
-  Record selectRecord(int id_key) {
-    return table.get(id_key);
+  Record selectRecord(String... id_keys) {
+    ArrayList<String> pk = new ArrayList<String>();
+    for (String id_key : id_keys) {
+      pk.add(id_key);
+    }
+    return table.get(pk);
   }
 
   boolean updateRecord(Record r, String field_name, String value) {
@@ -84,8 +88,8 @@ class Table {
     }
   }
 
-  Set<Integer> getKeys() {
-    return keys;
+  Set<ArrayList<String>> getKeys() {
+    return hash_keys;
   }
 
   Record selectFieldNames() {
@@ -101,8 +105,8 @@ class Table {
     if (isPk(heading)) {
       pk_cols.add(headings.size()-1);
     }
-    for (Integer key: keys) {// this is why hash tables are still a good idea
-      selectRecord(key).addItem(null);
+    for (ArrayList<String> key: hash_keys) {
+      selectRecord(listToString(key)).addItem(null);
     }
   }
 
@@ -110,13 +114,22 @@ class Table {
     if (headings.contains(heading)) {
       int i = headings.indexOf(heading);
       headings.removeItem(i);
-      for (Integer key : keys) {
-        selectRecord(key).removeItem(i);
+      for (ArrayList<String> key : hash_keys) {
+        selectRecord(listToString(key)).removeItem(i);
       }
       return true;
     } else {
       return false;
     }
+  }
+
+  String listToString(ArrayList<String> al) {
+    StringBuilder sb = new StringBuilder();
+    for (String s: al) {
+      sb.append(s + ",");
+    }
+    sb.deleteCharAt(sb.length()-1);
+    return sb.toString();
   }
 
   /******************************************/
@@ -125,15 +138,6 @@ class Table {
 
   void printFieldNames() {
     headings.printRecord();
-  }
-
-  void printTable() {
-    System.out.print("   ");
-    printFieldNames();
-    for (Integer key : keys) {
-      System.out.print(key + ": ");
-      selectRecord(key).printRecord();
-    }
   }
 
   void claim(boolean b) {
@@ -151,30 +155,34 @@ class Table {
     claim(! a_table.insertRecord(r2));
     Record r3 = new Record("QPR", "Championship");
     claim(a_table.insertRecord(r3));
-    claim(a_table.selectRecord(1)!=null);
+    claim(a_table.selectRecord("QPR")!=null);
     Record r4 = new Record("Burnley", "Championship");
     claim(a_table.insertRecord(r4));
     Record r5 = new Record("WBA", "Championship");
     claim(a_table.insertRecord(r5));
-    claim(a_table.selectRecord(3).getItem(0).equals("WBA"));
+    claim(a_table.selectRecord("WBA").getItem(0).equals("WBA"));
     Record r6 = new Record("WBA", "Prem");
     claim(! a_table.insertRecord(r6));
 
     // deletions
-    claim(a_table.deleteRecord(3));
-    claim(! a_table.deleteRecord(15));
+    claim(a_table.deleteRecord("WBA"));
+    claim(! a_table.deleteRecord("Rovers"));
 
     // selecting a record
-    claim(a_table.selectRecord(3)==null);
-    claim(a_table.selectRecord(0) != null);
+    claim(a_table.selectRecord("WBA")==null);
+    claim(a_table.selectRecord("Rovers")==null);
+    claim(a_table.selectRecord("Tottenham")==null);
+    claim(a_table.selectRecord("Bristol FC") != null);
 
     // adding and removing columns and updating the values
-    a_table.printTable();
+    // a_table.printTable();
+    claim(a_table.headings.size() == 2);
     a_table.addColumn("Points");
     claim(a_table.headings.size() == 3);
+    claim(a_table.selectRecord("Burnley").size() == 3);
     claim(a_table.updateRecord(r3, "Points", "31"));
     claim(! a_table.updateRecord(r4, "Poits", "31"));
-    a_table.printTable();
+    // a_table.printTable();
     claim(a_table.removeColoumn("League"));
     claim(! a_table.removeColoumn("Legue"));
 
@@ -204,10 +212,12 @@ class Table {
     claim(table_pk.insertRecord(r02));
     claim(table_pk.insertRecord(r03));
     claim(! table_pk.insertRecord(r04));
-    claim(table_pk.primary_keys.size()==3);
     claim(table_pk.size()==3);
 
-    a_table.printTable();
+    // a_table.printTable();
+
+    Io io = new Io();
+    io.printTable(a_table);
 
     System.out.println("Testing finished");
   }
