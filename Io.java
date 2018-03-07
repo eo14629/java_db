@@ -19,7 +19,7 @@ class Io {
 
       writeFields(table.selectFieldNames(), out);
       for (ArrayList<String> key : table.getKeys()) {
-        writeFields(table.selectRecord(table.listToString(key)), out);
+        writeFields(table.selectRecord(key), out);
       }
     } catch (IOException e) {
       e.printStackTrace();
@@ -98,6 +98,36 @@ class Io {
     print(table, col_width);
   }
 
+  void findColWidths(Table table, int[] col_width) {
+    ofHeadings(table, col_width);
+    ofRecords(table, col_width);
+  }
+
+  void ofHeadings(Table table, int[] col_width) {
+    for (int i=0; i<table.selectFieldNames().size(); i++) {
+      String s = table.selectFieldNames().getItem(i);
+      col_width[i] = s.length();
+    }
+  }
+
+  void ofRecords(Table table, int[] col_width) {
+    for (ArrayList<String> hkey : table.getKeys()) {
+      // String s_hkey = table.listToString(hkey);
+      for (int i=0; i<table.selectRecord(hkey).size(); i++) {
+        if (table.selectRecord(hkey).getItem(i)==null) {
+          if (null_str_len > col_width[i]) {
+            col_width[i] = null_str_len;
+          }
+        } else {
+          String s = table.selectRecord(hkey).getItem(i);
+          if (s.length() > col_width[i]) {
+            col_width[i] = s.length();
+          }
+        }
+      }
+    }
+  }
+
   void print(Table table, int[] col_width) {
     int table_width = IntStream.of(col_width).sum() + (2*table.selectFieldNames().size());
 
@@ -120,49 +150,19 @@ class Io {
 
   void theRecords(Table table, int[] col_width) {
     for (ArrayList<String> hkey : table.getKeys()) {
-      String s_hkey = table.listToString(hkey);
+      // String s_hkey = table.listToString(hkey);
       System.out.print('|');
-        for (int i=0; i<table.selectRecord(s_hkey).size(); i++) {
+        for (int i=0; i<table.selectRecord(hkey).size(); i++) {
           StringBuilder s_prnt = new StringBuilder();
-          if (table.selectRecord(s_hkey).getItem(i)==null) {
+          if (table.selectRecord(hkey).getItem(i)==null) {
             s_prnt.append("NULL");
           } else {
-            s_prnt.append(table.selectRecord(s_hkey).getItem(i));
+            s_prnt.append(table.selectRecord(hkey).getItem(i));
           }
           s_prnt = align(s_prnt, col_width, i);
           System.out.print(s_prnt.toString() + '|');
         }
       System.out.println();
-    }
-  }
-
-  void findColWidths(Table table, int[] col_width) {
-    ofHeadings(table, col_width);
-    ofRecords(table, col_width);
-  }
-
-  void ofHeadings(Table table, int[] col_width) {
-    for (int i=0; i<table.selectFieldNames().size(); i++) {
-      String s = table.selectFieldNames().getItem(i);
-      col_width[i] = s.length();
-    }
-  }
-
-  void ofRecords(Table table, int[] col_width) {
-    for (ArrayList<String> hkey : table.getKeys()) {
-      String s_hkey = table.listToString(hkey);
-      for (int i=0; i<table.selectRecord(s_hkey).size(); i++) {
-        if (table.selectRecord(s_hkey).getItem(i)==null) {
-          if (null_str_len > col_width[i]) {
-            col_width[i] = null_str_len;
-          }
-        } else {
-          String s = table.selectRecord(s_hkey).getItem(i);
-          if (s.length() > col_width[i]) {
-            col_width[i] = s.length();
-          }
-        }
-      }
     }
   }
 
@@ -216,16 +216,16 @@ class Io {
 
     // write the table to a file, then output the file into a table
     // and ensure the table is correctly layed out.
-    writeCsv(football_out, "test.csv");
-    football_in = inputCsv("test.csv");
+    writeCsv(football_out, "../test.csv");
+    football_in = inputCsv("../test.csv");
 
     claim(football_in.size()==10);
     claim(football_in.selectFieldNames().getItem(0).equals("Team*"));
     claim(football_in.selectFieldNames().getItem(1).equals("Goals"));
     claim(football_in.selectFieldNames().getItem(2).equals("Points"));
-    claim(football_in.selectRecord("4").getItem(0).equals("4"));
-    claim(football_in.selectRecord("hoop's").getItem(1).equals("17"));
-    claim(football_in.selectRecord("Bristol Rovers").getItem(0).equals("Bristol Rovers"));
+    claim(football_in.selectRecord(football_in.keyGen("4")).getItem(0).equals("4"));
+    claim(football_in.selectRecord(football_in.keyGen("hoop's")).getItem(1).equals("17"));
+    claim(football_in.selectRecord(football_in.keyGen("Bristol Rovers")).getItem(0).equals("Bristol Rovers"));
 
     printTable(football_in);
 

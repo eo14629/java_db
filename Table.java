@@ -41,7 +41,8 @@ class Table {
       for (int col : pk_cols) {
         key.add(r.getItem(col));
       }
-      if (table.put(key,r)==null) {
+      if (! hash_keys.contains(key)) {
+        table.put(key,r);
         return true;
       } else {
         return false;
@@ -61,6 +62,15 @@ class Table {
     return false;
   }
 
+  ArrayList<String> keyGen(String... keys) {
+    ArrayList<String> pks = new ArrayList<String>();
+    for (String key : keys) {
+      pks.add(key);
+    }
+    return pks;
+  }
+
+  // use the PK for this
   boolean deleteRecord(String... id_keys) {
     ArrayList<String> pk = new ArrayList<String>();
     for (String id_key : id_keys) {
@@ -70,14 +80,11 @@ class Table {
     return true;
   }
 
-  Record selectRecord(String... id_keys) {
-    ArrayList<String> pk = new ArrayList<String>();
-    for (String id_key : id_keys) {
-      pk.add(id_key);
-    }
+  Record selectRecord(ArrayList<String> pk) {
     return table.get(pk);
   }
 
+  // use the PK for this too
   boolean updateRecord(Record r, String field_name, String value) {
     if (headings.contains(field_name)) {
       int i = headings.indexOf(field_name);
@@ -106,7 +113,7 @@ class Table {
       pk_cols.add(headings.size()-1);
     }
     for (ArrayList<String> key: hash_keys) {
-      selectRecord(listToString(key)).addItem(null);
+      selectRecord(key).addItem(null);
     }
   }
 
@@ -115,7 +122,7 @@ class Table {
       int i = headings.indexOf(heading);
       headings.removeItem(i);
       for (ArrayList<String> key : hash_keys) {
-        selectRecord(listToString(key)).removeItem(i);
+        selectRecord(key).removeItem(i);
       }
       return true;
     } else {
@@ -155,12 +162,14 @@ class Table {
     claim(! a_table.insertRecord(r2));
     Record r3 = new Record("QPR", "Championship");
     claim(a_table.insertRecord(r3));
-    claim(a_table.selectRecord("QPR")!=null);
+    claim(a_table.selectRecord(a_table.keyGen("QPR"))!=null);
     Record r4 = new Record("Burnley", "Championship");
     claim(a_table.insertRecord(r4));
     Record r5 = new Record("WBA", "Championship");
     claim(a_table.insertRecord(r5));
-    claim(a_table.selectRecord("WBA").getItem(0).equals("WBA"));
+    claim(a_table.selectRecord(a_table.keyGen("WBA")).getItem(0).equals("WBA"));
+
+    // checks that duplicate pks cannot get added
     Record r6 = new Record("WBA", "Prem");
     claim(! a_table.insertRecord(r6));
 
@@ -169,17 +178,17 @@ class Table {
     claim(! a_table.deleteRecord("Rovers"));
 
     // selecting a record
-    claim(a_table.selectRecord("WBA")==null);
-    claim(a_table.selectRecord("Rovers")==null);
-    claim(a_table.selectRecord("Tottenham")==null);
-    claim(a_table.selectRecord("Bristol FC") != null);
+    claim(a_table.selectRecord(a_table.keyGen("WBA"))==null);
+    claim(a_table.selectRecord(a_table.keyGen("Rovers"))==null);
+    claim(a_table.selectRecord(a_table.keyGen("Tottenham"))==null);
+    claim(a_table.selectRecord(a_table.keyGen("Bristol FC")) != null);
 
     // adding and removing columns and updating the values
     // a_table.printTable();
     claim(a_table.headings.size() == 2);
     a_table.addColumn("Points");
     claim(a_table.headings.size() == 3);
-    claim(a_table.selectRecord("Burnley").size() == 3);
+    claim(a_table.selectRecord(a_table.keyGen("Burnley")).size() == 3);
     claim(a_table.updateRecord(r3, "Points", "31"));
     claim(! a_table.updateRecord(r4, "Poits", "31"));
     // a_table.printTable();
@@ -207,17 +216,24 @@ class Table {
     Record r01 = new Record("Bristol FC", "Championship", "14");
     Record r02 = new Record("Bristol FC", "Premier League", "14");
     Record r03 = new Record("QPR", "Championship", "1");
-    Record r04 = new Record("Bristol FC", "Championship", "12");
+    Record r04 = new Record("Bristol FC", "Premier League", "12");
     claim(table_pk.insertRecord(r01));
     claim(table_pk.insertRecord(r02));
     claim(table_pk.insertRecord(r03));
     claim(! table_pk.insertRecord(r04));
     claim(table_pk.size()==3);
 
+    // Ensuring no overriding when entering a duplicate - the record
+    // should not be entered into the table
+    ArrayList<String> bristol = new ArrayList<String>();
+    bristol = table_pk.keyGen("Bristol FC","Premier League");
+    claim(! table_pk.selectRecord(bristol).getItem(2).equals("12"));
+    claim(table_pk.selectRecord(bristol).getItem(2).equals("14"));
+
     // a_table.printTable();
 
     Io io = new Io();
-    io.printTable(a_table);
+    io.printTable(table_pk);
 
     System.out.println("Testing finished");
   }
