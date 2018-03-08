@@ -10,6 +10,7 @@ class Io {
     program.testToFile();
   }
 
+  // will print in alphabetical order due to the nature of the TreeMap
   void showTables(Database d) {
     System.out.println("Available Tables in Database:");
     for (String key : d.getKeys()) {
