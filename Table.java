@@ -128,10 +128,6 @@ class Table {
   /***************** TESTING ****************/
   /******************************************/
 
-  void printFieldNames() {
-    headings.printRecord();
-  }
-
   void claim(boolean b) {
     if (!b) throw new Error("Test failed");
   }

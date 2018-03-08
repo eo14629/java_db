@@ -10,6 +10,13 @@ class Io {
     program.testToFile();
   }
 
+  void showTables(Database d) {
+    System.out.println("Available Tables in Database:");
+    for (String key : d.getKeys()) {
+       System.out.println(key);
+    }
+  }
+
   void writeCsv(Table table, String file_name) {
     File f = new File(file_name);
     FileWriter out = null;
