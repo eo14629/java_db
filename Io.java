@@ -18,8 +18,34 @@ class Io {
     }
   }
 
-  void writeCsv(Table table, String file_name) {
-    File f = new File(file_name);
+  // maybe boolean
+  void mkDir(Database d) {
+    File theDir = new File(d.getName());
+
+    if (! theDir.exists()) {
+      System.out.println("creating directory: " + theDir.getName());
+      boolean result = false;
+      try{
+        theDir.mkdir();
+        result = true;
+      }
+      catch(SecurityException se){}
+      if(result) {
+        System.out.println("DIR created");
+      } else {
+        throw new Error("directory failed to create");
+      }
+    } else {
+      throw new Error("directory already exists");
+    }
+
+    for (String key : d.getKeys()) {
+      writeCsv(d.select(key), key, d);
+    }
+  }
+
+  void writeCsv(Table table, String file_name, Database d) {
+    File f = new File(d.getName() + "/" + file_name);
     FileWriter out = null;
 
     try {
@@ -52,8 +78,8 @@ class Io {
 
   // assumed here that the format of the csv is double quoted fields
   // separated by commas.
-  Table inputCsv(String pathname) {
-    File file = new File(pathname);
+  Table inputCsv(String file_name, Database d) {
+    File file = new File(d.getName() + "/" + file_name);
     Scanner scanner = null;
     Record headings = new Record();
     Table table = new Table();
@@ -200,6 +226,8 @@ class Io {
   void testToFile() {
     System.out.println("Testing start");
 
+    Database d = new Database("Football_Io");
+
     Table football_out = new Table("Team*","Goals  ","Points");
     Table football_in = new Table();
 
@@ -224,16 +252,17 @@ class Io {
 
     // write the table to a file, then output the file into a table
     // and ensure the table is correctly layed out.
-    writeCsv(football_out, "../test.csv");
-    football_in = inputCsv("../test.csv");
+    mkDir(d);
+    writeCsv(football_out, "test.csv", d);
+    football_in = inputCsv("test.csv", d);
 
     claim(football_in.size()==10);
     claim(football_in.selectFieldNames().getItem(0).equals("Team*"));
     claim(football_in.selectFieldNames().getItem(1).equals("Goals"));
     claim(football_in.selectFieldNames().getItem(2).equals("Points"));
-    claim(football_in.selectRecord(football_in.keyGen("4")).getItem(0).equals("4"));
-    claim(football_in.selectRecord(football_in.keyGen("hoop's")).getItem(1).equals("17"));
-    claim(football_in.selectRecord(football_in.keyGen("Bristol Rovers")).getItem(0).equals("Bristol Rovers"));
+    claim(football_in.selectItem(football_in.keyGen("4"),"Team*").equals("4"));
+    claim(football_in.selectItem(football_in.keyGen("hoop's"),"Goals").equals("17"));
+    claim(football_in.selectItem(football_in.keyGen("Bristol Rovers"),"Team*").equals("Bristol Rovers"));
 
     printTable(football_in);
 

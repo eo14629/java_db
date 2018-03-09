@@ -4,10 +4,19 @@ class Database {
   // using a TreeMap to ease the process of printing in Alphabetical order
   private TreeMap<String,Table> database = new TreeMap<String,Table>();
   private Set<String> keys = database.keySet();
+  private String db_name;
 
   public static void main(String args[]) {
-    Database program = new Database();
+    Database program = new Database("program");
     program.testDatabase();
+  }
+
+  Database(String db_name) {
+    this.db_name = db_name;
+  }
+
+  String getName() {
+    return db_name;
   }
 
   boolean drop(String name) {
@@ -51,7 +60,7 @@ class Database {
   void testDatabase() {
     System.out.println("Testing started");
 
-    Database d = new Database();
+    Database d = new Database("Football");
     testAddDiffTables(d);
     testAddDuplicateTables(d);
     testSelect(d);
@@ -59,6 +68,8 @@ class Database {
 
     Io io = new Io();
     io.showTables(d);
+
+    testDirectory(io,d);
 
     System.out.println("Testing finished");
   }
@@ -104,5 +115,9 @@ class Database {
     claim(! d.drop("t4"));
     claim(! d.drop("t19"));
     claim(d.size()==3);
+  }
+
+  void testDirectory(Io io, Database d) {
+    io.mkDir(d);
   }
 }
