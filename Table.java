@@ -79,6 +79,14 @@ class Table {
     return table.get(pk);
   }
 
+  String selectItem(ArrayList<String> pk, String col) {
+    if (headings.contains(col)) {
+      return table.get(pk).getItem(headings.indexOf(col));
+    } else {
+      return null;
+    }
+  }
+
   boolean updateRecord(ArrayList<String> pk, String field_name, String value) {
     if (headings.contains(field_name)) {
       int i = headings.indexOf(field_name);
@@ -168,7 +176,7 @@ class Table {
     claim(a_table.insertRecord(r4));
     Record r5 = new Record("WBA", "Championship");
     claim(a_table.insertRecord(r5));
-    claim(a_table.selectRecord(a_table.keyGen("WBA")).getItem(0).equals("WBA"));
+    claim(a_table.selectItem(a_table.keyGen("WBA"),"Name*").equals("WBA"));
   }
 
   // checks that duplicate pks cannot get added
@@ -198,10 +206,10 @@ class Table {
     a_table.addColumn("Points");
     claim(a_table.headings.size()==3);
     claim(a_table.selectRecord(a_table.keyGen("Burnley")).size() == 3);
-    claim(a_table.selectRecord(a_table.keyGen("QPR")).getItem(2)==null);
+    claim(a_table.selectItem(a_table.keyGen("QPR"), "Points")==null);
     claim(a_table.updateRecord(a_table.keyGen("QPR"), "Points", "31"));
-    claim(a_table.selectRecord(a_table.keyGen("QPR")).getItem(2)!=null);
-    claim(a_table.selectRecord(a_table.keyGen("QPR")).getItem(2).equals("31"));
+    claim(a_table.selectItem(a_table.keyGen("QPR"), "Points")!=null);
+    claim(a_table.selectItem(a_table.keyGen("QPR"), "Points").equals("31"));
     claim(! a_table.updateRecord(a_table.keyGen("Burnley"), "Poits", "31"));
     claim(a_table.removeColoumn("League"));
     claim(! a_table.removeColoumn("Legue"));
@@ -241,8 +249,8 @@ class Table {
   void testOverride(Table table_pk) {
     ArrayList<String> bristol = new ArrayList<String>();
     bristol = table_pk.keyGen("Bristol FC","Premier League");
-    claim(! table_pk.selectRecord(bristol).getItem(2).equals("12"));
-    claim(table_pk.selectRecord(bristol).getItem(2).equals("14"));
+    claim(! table_pk.selectItem(bristol,"Points").equals("12"));
+    claim(table_pk.selectItem(bristol,"Points").equals("14"));
   }
 
   // check the error is thrown for no primary keys (uncomment to check it works)
