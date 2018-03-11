@@ -6,7 +6,8 @@ class Table {
   private Hashtable<ArrayList<String>,Record> table = new Hashtable<ArrayList<String>,Record>();
   private Record headings = new Record();
   private Set<ArrayList<String>> hash_keys = table.keySet();
-  private ArrayList<Integer> pk_cols = new ArrayList<Integer>();
+  private List<Integer> pk_cols = new ArrayList<Integer>();
+  private List<Fk<String,String,String>> fks = new ArrayList<Fk<String,String,String>>();
   private int id = 0;
 
   public static void main(String args[]) {
@@ -130,6 +131,10 @@ class Table {
     } else {
       return false;
     }
+  }
+
+  boolean fk(String fk_col, String ref_table, String ref_col) {
+    return true;
   }
 
   /******************************************/
