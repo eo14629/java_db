@@ -1,25 +1,31 @@
 import java.util.*;
 
-class Fk<A, B, C> {
-  private final A fk_col;
-  private final B ref_table;
-  private final C ref_col;
+class Fk<A, B, C, D> {
+  private final A fk_table;
+  private final B fk_col;
+  private final C ref_table;
+  private final D ref_col;
 
-  Fk(final A fk_col, final B ref_table, final C ref_col) {
+  Fk(final A fk_table, final B fk_col, final C ref_table, final D ref_col) {
+    this.fk_table = fk_table;
     this.fk_col = fk_col;
     this.ref_table = ref_table;
     this.ref_col = ref_col;
   }
 
-  A getFkCol() {
+  A getFkTable() {
+    return fk_table;
+  }
+
+  B getFkCol() {
     return fk_col;
   }
 
-  B getRefTable() {
+  C getRefTable() {
     return ref_table;
   }
 
-  C getRefCol() {
+  D getRefCol() {
     return ref_col;
   }
 
@@ -28,7 +34,7 @@ class Fk<A, B, C> {
   //
 
   public static void main(String args[]) {
-    Fk<String,String,String> program = new Fk<String,String,String>("yes","no","maybe");
+    Fk<String,String,String,String> program = new Fk<String,String,String,String>("yes","no","maybe","?");
     program.testFk();
   }
 
@@ -39,8 +45,9 @@ class Fk<A, B, C> {
   void testFk() {
     System.out.println("Testing Started");
 
-    List<Fk<String,String,String>> l1 = new ArrayList<Fk<String,String,String>>();
-    Fk<String,String,String> fk1 = new Fk<String,String,String>("yes","no","maybe");
+    List<Fk<String,String,String,String>> l1 = new ArrayList<Fk<String,String,String,String>>();
+    Fk<String,String,String,String> fk1 = new Fk<String,String,String,String>("?","yes","no","maybe");
+    claim(fk1.getFkTable().equals("?"));
     claim(fk1.getFkCol().equals("yes"));
     claim(fk1.getRefTable().equals("no"));
     claim(fk1.getRefCol().equals("maybe"));

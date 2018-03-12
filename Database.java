@@ -1,24 +1,30 @@
+// Database class is used to group together related tables. This class is also
+// able to wrap up all the related tables as csv files in a directory structure on disk.
+
 import java.util.*;
 
 class Database {
   // using a TreeMap to ease the process of printing in Alphabetical order
-  private TreeMap<String,Table> database = new TreeMap<String,Table>();
+  private Map<String,Table> database = new TreeMap<String,Table>();
   private Set<String> keys = database.keySet();
-  private String db_name;
+  private final String db_name;
 
   public static void main(String args[]) {
     Database program = new Database("program");
     program.testDatabase();
   }
 
-  Database(String db_name) {
+  // simple constructor to initialise the Database and give it a name
+  Database(final String db_name) {
     this.db_name = db_name;
   }
 
+  // encapsulating the db_name field to be read only
   String getName() {
     return db_name;
   }
 
+  // the ability to remove a table from the database
   boolean drop(String name) {
     if (database.remove(name) == null) {
       return false;
@@ -26,6 +32,7 @@ class Database {
     return true;
   }
 
+  // add a preexisting table to the database
   boolean add(String name, Table table) {
     if (! keys.contains(name)) {
       database.put(name, table);
@@ -34,6 +41,7 @@ class Database {
     return false;
   }
 
+  // get a table from the database
   Table select(String name) {
     if (keys.contains(name)) {
       return database.get(name);
@@ -41,6 +49,7 @@ class Database {
     return null;
   }
 
+  // encampsulation of the keys in order to print the tables from the Io class
   Set<String> getKeys() {
     return database.keySet();
   }
@@ -49,6 +58,7 @@ class Database {
   /***************** TESTING ****************/
   /******************************************/
 
+  // size method used purely for testing
   int size() {
     return database.size();
   }
@@ -99,10 +109,15 @@ class Database {
     claim(d.add("t4", t4) && d.size()==5);
   }
 
+  // test the select works as it should
+  // uncomment tests to see the error throwing work correctly
   void testSelect(Database d) {
     Table t = new Table();
+    claim(d.select("t1")!=null);
     t = d.select("t1");
-    claim(t.selectRecord(t.keyGen("Eddie")).getItem(0).equals("Eddie"));
+    claim(t.selectItem(t.keyGen("Eddie"),"Name*").equals("Eddie"));
+    // claim(t.selectItem(t.keyGen("Edde"),"Name*").equals("Eddie"));
+    // claim(t.selectItem(t.keyGen("Eddie"),"Nae*").equals("Eddie"));
     claim(d.select("t3")==null);
   }
 
@@ -117,6 +132,7 @@ class Database {
     claim(d.size()==3);
   }
 
+  // making the database directory within the current directory
   void testDirectory(Io io, Database d) {
     io.mkDir(d);
   }

@@ -1,11 +1,11 @@
-// make a Hashtable which has an integer key and a variable length array of strings for input.
-// This way any number of fields can be inputted but this could be set to a specific value.
-// Also, each record has its unique key so it is easy to retrieve the record.
+// The Record class' main purpose is to efficiently store strings.
+// However it is important that this class is responsible for adding, removing ammending
+// and getting items from within the record.
 
 import java.util.*;
 
 class Record {
-  private ArrayList<String> the_record = new ArrayList<String>();
+  private List<String> r = new ArrayList<String>();
   private int size;
 
   public static void main(String args[]) {
@@ -13,48 +13,49 @@ class Record {
     program.testRecord();
   }
 
+  // The constructor of this class takes in the Strings to be stored in the Record.
   Record(String... field_entries) {
     for (String field_entry: field_entries) {
-      the_record.add(field_entry);
+      r.add(field_entry);
       size++;
     }
   }
 
-  boolean addItem(String value) {
+  /* All of the methods here are essentially just wrappers for the ArrayList type. */
+
+  void addItem(String value) {
+    r.add(value);
     size++;
-    return the_record.add(value);
   }
 
   boolean removeItem(int index) {
-    if (index < the_record.size()) {
-      the_record.remove(index);
+    if (index < r.size()) {
+      r.remove(index);
       size--;
       return true;
     }
     return false;
   }
 
-  String getItem(int index) {
-    return the_record.get(index);
-  }
-
   boolean ammendItem(int index, String value) {
-    if (index < the_record.size()) {
-      the_record.set(index, value);
+    if (index < r.size()) {
+      r.set(index, value);
       return true;
     }
     return false;
   }
 
-  // diff from table
-
   boolean contains(String field) {
-    if (the_record.contains(field)) { return true; }
+    if (r.contains(field)) { return true; }
     return false;
   }
 
+  String getItem(int index) {
+    return r.get(index);
+  }
+
   int indexOf(String field) {
-    return the_record.indexOf(field);
+    return r.indexOf(field);
   }
 
   int size() {
@@ -66,7 +67,7 @@ class Record {
   /******************************************/
 
   void printRecord() {
-    System.out.println(the_record);
+    System.out.println(r);
   }
 
   void claim(boolean b) {
@@ -74,35 +75,53 @@ class Record {
   }
 
   void testRecord() {
-    // creating records by using constructors
-    Record a_record = new Record("One","Two","Three");
-    Record b_record = new Record("a","b");
-    Record c_record = new Record("five","m","i","l","l","i","o","n");
+    System.out.println("Testing Started");
 
-    // get
-    claim(a_record.getItem(1).equals("Two"));
-    claim(c_record.getItem(7).equals("n"));
+    Record a = new Record("One","Two","Three");
+    Record b = new Record("a","b");
+    Record c = new Record("five","m","i","l","l","i","o","n");
 
-    // ammend
-    claim(c_record.ammendItem(0,"six"));
-    claim(c_record.getItem(0).equals("six"));
-    claim(b_record.ammendItem(1,"c"));
-    claim(b_record.getItem(1).equals("c"));
-    claim(! b_record.ammendItem(2,"d"));
+    testGet(a,b,c);
+    testAmmend(a,b,c);
+    testAddRemove(a,b);
+    testContains(c);
 
-    // add and remove
-    a_record.addItem("Four");
-    claim(a_record.size() == 4 && a_record.getItem(3).equals("Four"));
-    claim(b_record.removeItem(0));
-    claim(! b_record.removeItem(1));
-    claim(b_record.size() == 1);
+    a.printRecord();
+    b.printRecord();
+    c.printRecord();
 
-    // contains and indexOf
-    claim(c_record.contains("six"));
-    claim(c_record.indexOf("l")==3);// will find the first instance
+    System.out.println("Testing Finished");
+  }
 
-    a_record.printRecord();
-    b_record.printRecord();
-    c_record.printRecord();
+  void testGet(Record a, Record b, Record c) {
+    claim(a.getItem(1).equals("Two"));
+    claim(b.getItem(0).equals("a"));
+    claim(c.getItem(7).equals("n"));
+  }
+
+  void testAmmend(Record a, Record b, Record c) {
+    claim(a.ammendItem(0,"Two"));
+    claim(a.getItem(0).equals("Two"));
+    claim(a.ammendItem(0,"One"));
+    claim(a.getItem(0).equals("One"));
+    claim(b.ammendItem(1,"c"));
+    claim(b.getItem(1).equals("c"));
+    claim(! b.ammendItem(2,"d"));
+    claim(c.ammendItem(0,"six"));
+    claim(c.getItem(0).equals("six"));
+  }
+
+  void testAddRemove(Record a, Record b) {
+    a.addItem("Four");
+    claim(a.size() == 4 && a.getItem(3).equals("Four"));
+    claim(b.removeItem(0));
+    claim(! b.removeItem(1));
+    claim(b.size() == 1);
+  }
+
+  // The indexOf will find the first instance of the string in the record.
+  void testContains(Record c) {
+    claim(c.contains("six"));
+    claim(c.indexOf("l")==3);
   }
 }

@@ -1,20 +1,25 @@
+// The Table class is responsible for holding records. It is in charge or adding, deleting
+// and updating records. It also can add or remove columns to the table and check for primary keys.
+
 import java.util.*;
 
 class Table {
-  // think there is repeted data here. because the keys are storing data
-  // that is also in the hash key
+  // I think there is repeated data here. because the keys of the hash table are storing data
+  // that is already stored in the Hashtable as Records(the primary key columns)
   private Hashtable<ArrayList<String>,Record> table = new Hashtable<ArrayList<String>,Record>();
   private Record headings = new Record();
   private Set<ArrayList<String>> hash_keys = table.keySet();
   private List<Integer> pk_cols = new ArrayList<Integer>();
-  private List<Fk<String,String,String>> fks = new ArrayList<Fk<String,String,String>>();
-  private int id = 0;
 
   public static void main(String args[]) {
     Table program = new Table();
     program.testTable();
   }
 
+  // The constructor for the Table class takes in the headings for the columns.
+  // if any of the headings have an asterisk after the heading, then this is
+  // an indication that it is a primary key.
+  // A table can have MULTIPLE primary keys but a table must have at least one
   Table(String... headings) {
     int col_count = 0;
     Record field_name_record = new Record(headings);
@@ -35,10 +40,7 @@ class Table {
     this.headings = field_name_record;
   }
 
-  int numPks() {
-    return pk_cols.size();
-  }
-
+  // checking that a string is a primary key field or not
   boolean isPk(String s) {
     if (s.charAt(s.length()-1) == '*') {
       return true;
@@ -46,7 +48,7 @@ class Table {
     return false;
   }
 
-  // probs need errors here.
+  // inserting a record and checking against the primary key fields
   boolean insertRecord(Record r) {
     if (r.size() == headings.size()) {
       ArrayList<String> key = new ArrayList<String>();
@@ -57,12 +59,21 @@ class Table {
         table.put(key,r);
         return true;
       } else {
-        return false;
+        throw new Error("Duplicate primary key");
       }
     }
-    return false;
+    throw new Error("Wrong number of fields in this record for this table");
   }
 
+  boolean deleteRecord(ArrayList<String> pk) {
+    if (table.remove(pk) == null) {
+      throw new Error("Primary key does not exist");
+    }
+    return true;
+  }
+
+  // Converting Strings of Primary keys into an array list for Selecting records and items in a record
+  // this method is used in conjuncture with selectRecord and selectItem
   ArrayList<String> keyGen(String... keys) {
     ArrayList<String> pks = new ArrayList<String>();
     for (String key : keys) {
@@ -71,20 +82,26 @@ class Table {
     return pks;
   }
 
-  boolean deleteRecord(ArrayList<String> pk) {
-    if (table.remove(pk) == null) { return false; }
-    return true;
-  }
-
+  // selecting a record from a table
   Record selectRecord(ArrayList<String> pk) {
-    return table.get(pk);
+    if (hash_keys.contains(pk)) {
+      return table.get(pk);
+    } else {
+      throw new Error("Primary key set does not exist");
+    }
   }
 
+  // selecting an item from a record from within a table. this uses the record class
+  // to get the item from within the record.
   String selectItem(ArrayList<String> pk, String col) {
     if (headings.contains(col)) {
-      return table.get(pk).getItem(headings.indexOf(col));
+      if (table.get(pk)!=null) {
+        return table.get(pk).getItem(headings.indexOf(col));
+      } else {
+        throw new Error("No such Item in this Table");
+      }
     } else {
-      return null;
+      throw new Error("No such Heading in this Table");
     }
   }
 
@@ -94,20 +111,8 @@ class Table {
       selectRecord(pk).ammendItem(i,value);
       return true;
     } else {
-      return false;
+      throw new Error("Cannot update record - Field name does not exist in table");
     }
-  }
-
-  Set<ArrayList<String>> getKeys() {
-    return hash_keys;
-  }
-
-  Record selectFieldNames() {
-    return headings;
-  }
-
-  int size() {
-    return table.size();
   }
 
   void addColumn(String heading) {
@@ -120,7 +125,7 @@ class Table {
     }
   }
 
-  boolean removeColoumn(String heading) {
+  boolean removeColumn(String heading) {
     if (headings.contains(heading)) {
       int i = headings.indexOf(heading);
       headings.removeItem(i);
@@ -129,12 +134,23 @@ class Table {
       }
       return true;
     } else {
-      return false;
+      throw new Error("Cannot remove column - column does not exist");
     }
   }
 
-  boolean fk(String fk_col, String ref_table, String ref_col) {
-    return true;
+  // encapsulation of certain private fields which can be read
+  // by other classes in a controlled manner.
+  Set<ArrayList<String>> getKeys() {
+    return hash_keys;
+  }
+  Record selectFieldNames() {
+    return headings;
+  }
+  int size() {
+    return table.size();
+  }
+  int numPks() {
+    return pk_cols.size();
   }
 
   /******************************************/
@@ -145,6 +161,8 @@ class Table {
     if (!b) throw new Error("Test failed");
   }
 
+  // in the indiviual test methods, there are certain tests which are commented out.
+  // uncomment these to check that the error throwing works as it should.
   void testTable() {
     System.out.println("Testing start");
     Table a_table = new Table("Name*", "League");
@@ -173,7 +191,7 @@ class Table {
     Record r1 = new Record("Bristol FC", "Championship");
     claim(a_table.insertRecord(r1));
     Record r2 = new Record("Wolves", "Championship", "SLDKA");
-    claim(! a_table.insertRecord(r2));
+    // a_table.insertRecord(r2);
     Record r3 = new Record("QPR", "Championship");
     claim(a_table.insertRecord(r3));
     claim(a_table.selectRecord(a_table.keyGen("QPR"))!=null);
@@ -187,21 +205,21 @@ class Table {
   // checks that duplicate pks cannot get added
   void testDuplicates(Table a_table) {
     Record r6 = new Record("WBA", "Prem");
-    claim(! a_table.insertRecord(r6));
+    // a_table.insertRecord(r6);
   }
 
   // deletions
   void testDeletions(Table a_table) {
     claim(a_table.deleteRecord(a_table.keyGen("WBA")));
-    claim(! a_table.deleteRecord(a_table.keyGen("Rovers")));
+    // a_table.deleteRecord(a_table.keyGen("Rovers"));
     claim(a_table.size()==3);
   }
 
   // selecting a record
   void testSelections(Table a_table) {
-    claim(a_table.selectRecord(a_table.keyGen("WBA"))==null);
-    claim(a_table.selectRecord(a_table.keyGen("Rovers"))==null);
-    claim(a_table.selectRecord(a_table.keyGen("Tottenham"))==null);
+    // a_table.selectRecord(a_table.keyGen("WBA"));
+    // a_table.selectRecord(a_table.keyGen("Rovers"));
+    // a_table.selectRecord(a_table.keyGen("Tottenham"));
     claim(a_table.selectRecord(a_table.keyGen("Bristol FC")) != null);
   }
 
@@ -215,9 +233,9 @@ class Table {
     claim(a_table.updateRecord(a_table.keyGen("QPR"), "Points", "31"));
     claim(a_table.selectItem(a_table.keyGen("QPR"), "Points")!=null);
     claim(a_table.selectItem(a_table.keyGen("QPR"), "Points").equals("31"));
-    claim(! a_table.updateRecord(a_table.keyGen("Burnley"), "Poits", "31"));
-    claim(a_table.removeColoumn("League"));
-    claim(! a_table.removeColoumn("Legue"));
+    // a_table.updateRecord(a_table.keyGen("Burnley"), "Poits", "31");
+    claim(a_table.removeColumn("League"));
+    // a_table.removeColumn("Legue");
     claim(a_table.headings.size()==2);
   }
 
@@ -245,7 +263,7 @@ class Table {
     claim(table_pk.insertRecord(r01));
     claim(table_pk.insertRecord(r02));
     claim(table_pk.insertRecord(r03));
-    claim(! table_pk.insertRecord(r04));
+    // table_pk.insertRecord(r04);
     claim(table_pk.size()==3);
   }
 
@@ -258,7 +276,7 @@ class Table {
     claim(table_pk.selectItem(bristol,"Points").equals("14"));
   }
 
-  // check the error is thrown for no primary keys (uncomment to check it works)
+  // check the error is thrown for no primary keys
   void testNoPks() {
     // Table table_pk2 = new Table("Name","League","Points");
   }

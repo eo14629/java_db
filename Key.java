@@ -28,7 +28,8 @@ class Key {
   }
 
   boolean add(String value) {
-    return key.addItem(value);
+    key.addItem(value);
+    return true;
   }
 
   /******************************************/
