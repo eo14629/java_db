@@ -5,7 +5,7 @@
 import java.util.*;
 
 class Record {
-  private List<String> r = new ArrayList<String>();
+  private List<String> record = new ArrayList<String>();
   private int size;
 
   public static void main(String args[]) {
@@ -16,7 +16,7 @@ class Record {
   // The constructor of this class takes in the Strings to be stored in the Record.
   Record(String... field_entries) {
     for (String field_entry: field_entries) {
-      r.add(field_entry);
+      record.add(field_entry);
       size++;
     }
   }
@@ -24,13 +24,13 @@ class Record {
   /* All of the methods here are essentially just wrappers for the ArrayList type. */
 
   void addItem(String value) {
-    r.add(value);
+    record.add(value);
     size++;
   }
 
   boolean removeItem(int index) {
-    if (index < r.size()) {
-      r.remove(index);
+    if (index < record.size()) {
+      record.remove(index);
       size--;
       return true;
     }
@@ -38,24 +38,24 @@ class Record {
   }
 
   boolean ammendItem(int index, String value) {
-    if (index < r.size()) {
-      r.set(index, value);
+    if (index < record.size()) {
+      record.set(index, value);
       return true;
     }
     return false;
   }
 
   boolean contains(String field) {
-    if (r.contains(field)) { return true; }
+    if (record.contains(field)) { return true; }
     return false;
   }
 
   String getItem(int index) {
-    return r.get(index);
+    return record.get(index);
   }
 
   int indexOf(String field) {
-    return r.indexOf(field);
+    return record.indexOf(field);
   }
 
   int size() {
@@ -67,7 +67,7 @@ class Record {
   /******************************************/
 
   void printRecord() {
-    System.out.println(r);
+    System.out.println(record);
   }
 
   void claim(boolean b) {

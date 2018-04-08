@@ -20,7 +20,7 @@ class Io {
     }
   }
 
-  // make the directory for the database
+  // make the directory for the database and then input all the related tables.
   void mkDir(Database d) {
     File theDir = new File(d.getName());
 

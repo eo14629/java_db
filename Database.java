@@ -32,7 +32,7 @@ class Database {
     return true;
   }
 
-  // add a preexisting table to the database
+  // add a table to the database
   boolean add(String name, Table table) {
     if (! keys.contains(name)) {
       database.put(name, table);
@@ -44,12 +44,14 @@ class Database {
   // get a table from the database
   Table select(String name) {
     if (keys.contains(name)) {
-      return database.get(name);
+      Table table_copy = new Table();
+      table_copy = database.get(name);
+      return table_copy;
     }
     return null;
   }
 
-  // encampsulation of the keys in order to print the tables from the Io class
+  // encapsulation of the keys in order to print the tables from the Io class
   Set<String> getKeys() {
     return database.keySet();
   }

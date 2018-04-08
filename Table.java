@@ -65,15 +65,8 @@ class Table {
     throw new Error("Wrong number of fields in this record for this table");
   }
 
-  boolean deleteRecord(ArrayList<String> pk) {
-    if (table.remove(pk) == null) {
-      throw new Error("Primary key does not exist");
-    }
-    return true;
-  }
-
   // Converting Strings of Primary keys into an array list for Selecting records and items in a record
-  // this method is used in conjuncture with selectRecord and selectItem
+  // this method is used in conjuncture with selectRecord, selectItem, deleteRecord and updateRecord
   ArrayList<String> keyGen(String... keys) {
     ArrayList<String> pks = new ArrayList<String>();
     for (String key : keys) {
@@ -82,10 +75,12 @@ class Table {
     return pks;
   }
 
-  // selecting a record from a table
+  // selecting a record from a table - returns a copy to be safe.
   Record selectRecord(ArrayList<String> pk) {
     if (hash_keys.contains(pk)) {
-      return table.get(pk);
+      Record record_copy = new Record();
+      record_copy = table.get(pk);
+      return record_copy;
     } else {
       throw new Error("Primary key set does not exist");
     }
@@ -103,6 +98,13 @@ class Table {
     } else {
       throw new Error("No such Heading in this Table");
     }
+  }
+
+  boolean deleteRecord(ArrayList<String> pk) {
+    if (table.remove(pk) == null) {
+      throw new Error("Primary key does not exist");
+    }
+    return true;
   }
 
   boolean updateRecord(ArrayList<String> pk, String field_name, String value) {
@@ -144,7 +146,9 @@ class Table {
     return hash_keys;
   }
   Record selectFieldNames() {
-    return headings;
+    Record headings_copy = new Record();
+    headings_copy = headings;
+    return headings_copy;
   }
   int size() {
     return table.size();
