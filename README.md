@@ -7,4 +7,4 @@ KEY FEATURES:
 - Printing of tables into the terminal in a MySQL style.
 - Well defined class separation with no cyclical dependencies for Databases, Tables and Records.
 
-NOTE - no user interface, just the structure of the database. Make another class to use the methods avaiable to create a database of your own.
+NOTE - no user interface, just the structure of the database. Make another class to use the methods available to create a database of your own.
